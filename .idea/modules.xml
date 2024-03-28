@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ProjectModuleManager">
+    <modules>
+      <module fileurl="file://$PROJECT_DIR$/Hw3/Hw3.iml" filepath="$PROJECT_DIR$/Hw3/Hw3.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/Sasha-Vlad.iml" filepath="$PROJECT_DIR$/.idea/Sasha-Vlad.iml" />
+      <module fileurl="file://$PROJECT_DIR$/Scanner/Scanner.iml" filepath="$PROJECT_DIR$/Scanner/Scanner.iml" />
+      <module fileurl="file://$PROJECT_DIR$/Work1/Work1.iml" filepath="$PROJECT_DIR$/Work1/Work1.iml" />
+      <module fileurl="file://$PROJECT_DIR$/Work2/Work2.iml" filepath="$PROJECT_DIR$/Work2/Work2.iml" />
+    </modules>
+  </component>
+</project>
