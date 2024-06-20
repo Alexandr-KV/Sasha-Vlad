@@ -20,7 +20,6 @@ public class Main {
             person.setAge(22);
             Animal animal = person.getAnimal();
             animal.setAge(10);
-            person.setAnimal(animal);
             jsonString = new ObjectMapper().writeValueAsString(person);
             System.out.println(jsonString);
         }catch (Exception e){

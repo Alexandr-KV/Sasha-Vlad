@@ -1,8 +1,6 @@
 package ru.otus;
 
-import com.fasterxml.jackson.annotation.JsonAutoDetect;
 
-@JsonAutoDetect
 public class Animal {
     private String name;
     private int age;
@@ -25,6 +23,10 @@ public class Animal {
 
     public void setAge(int age) {
         this.age = age;
+    }
+
+    public void setName(String name) {
+        this.name = name;
     }
 
     @Override
