@@ -1,8 +1,12 @@
 package ru.otus;
 
+import ru.otus.exception.NoteNotFoundException;
+
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
+
+import static java.sql.Statement.RETURN_GENERATED_KEYS;
 
 public class NoteRepository {
     private final Connection connection;
@@ -25,22 +29,25 @@ public class NoteRepository {
         return notes;
     }
 
-    public Note readNoteById(long id) throws SQLException {
+    public Note readNoteById(long id) throws SQLException, NoteNotFoundException {
         PreparedStatement ps = connection.prepareStatement("SELECT * FROM notes WHERE id = (?)");
         ps.setLong(1, id);
         var resSet = ps.executeQuery();
         String title = resSet.getString("title");
         String message = resSet.getString("message");
+        if (title == null && message == null) {
+            throw new NoteNotFoundException("Note с данным id отсутствует");
+        }
         return new Note(id, title, message);
     }
 
     public Long writeNewNoteIntoRepository(String title, String message) throws SQLException {
-        PreparedStatement ps = connection.prepareStatement("insert into notes (title, message) values (?, ?)");
+        PreparedStatement ps = connection.prepareStatement("insert into notes (title, message) values (?, ?);", RETURN_GENERATED_KEYS);
         ps.setString(1, title);
         ps.setString(2, message);
         ps.executeUpdate();
-        var resSet = statement.executeQuery("SELECT `id` FROM `notes` ORDER BY `id` DESC LIMIT 1");
-        return resSet.getLong("id");
+        ResultSet generatedKeys = ps.getGeneratedKeys();
+        return (long) generatedKeys.getInt(1);
     }
 
     public void patchNoteById(Long id, String title, String message) throws SQLException {

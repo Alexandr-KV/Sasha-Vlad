@@ -11,10 +11,6 @@ public class Note {
         this.message = message;
     }
 
-    public Note(String title, String message) {
-        this.title = title;
-        this.message = message;
-    }
 
     public Note() {
     }

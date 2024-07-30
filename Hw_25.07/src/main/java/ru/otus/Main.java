@@ -4,6 +4,8 @@ package ru.otus;
 import io.javalin.Javalin;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import ru.otus.exception.NoteNotFoundException;
+import ru.otus.exception.ValidationException;
 
 import java.sql.SQLException;
 
@@ -19,11 +21,15 @@ public class Main {
         Javalin.create()
                 .events(eventConfig -> eventConfig.serverStopping(noteRepository::closeDb))
                 .before(ctx -> logger.info("Получен  запрос: {} {}", ctx.method(), ctx.path()))
-                .beforeMatched(ctx -> logger.info(ctx.headerMap() + " " + ctx.body()))
+                .beforeMatched(ctx -> logger.info("{} {}", ctx.headerMap(), ctx.body()))
                 .after(ctx -> logger.info("Окончен запрос: {} {}", ctx.method(), ctx.path()))
                 .afterMatched(ctx -> logger.info("Выдан ответ: {} {} {}", ctx.status(), ctx.headerMap(), ctx.result()))
                 .exception(ValidationException.class, (e, ctx) -> {
-                    logger.error("Возникло ValidException", e);
+                    logger.error("Возникло ValidException",e);
+                    ctx.json(e.getMessage());
+                })
+                .exception(NoteNotFoundException.class,(e, ctx) -> {
+                    logger.error("Возникло NoteNotFoundException", e);
                     ctx.json(e.getMessage());
                 })
                 .get("/note", noteController::getAllNotes)

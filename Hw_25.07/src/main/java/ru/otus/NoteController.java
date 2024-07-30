@@ -4,7 +4,8 @@ package ru.otus;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.javalin.http.Context;
-import ru.otus.request.NoteRequest;
+import ru.otus.request.NotePatchRequest;
+import ru.otus.request.NotePostRequest;
 import ru.otus.response.NoteResponse;
 
 import java.sql.SQLException;
@@ -34,17 +35,17 @@ public class NoteController {
     }
 
     public void postNote(Context ctx) throws SQLException, JsonProcessingException {
-        NoteRequest noteRequest = ctx.bodyAsClass(NoteRequest.class);
-        noteRequest.validPostRequest();
-        Long id = noteRepository.writeNewNoteIntoRepository(noteRequest.getTitle(), noteRequest.getMessage());
+        NotePostRequest notePostRequest = ctx.bodyAsClass(NotePostRequest.class);
+        notePostRequest.valid();
+        Long id = noteRepository.writeNewNoteIntoRepository(notePostRequest.getTitle(), notePostRequest.getMessage());
         ctx.result(new ObjectMapper().writeValueAsString(id));
     }
 
     public void patchNote(Context ctx) throws SQLException {
-        NoteRequest noteRequest = ctx.bodyAsClass(NoteRequest.class);
-        noteRequest.validPatchRequest();
+        NotePatchRequest notePatchRequest = ctx.bodyAsClass(NotePatchRequest.class);
+        notePatchRequest.valid();
         Long id = Long.parseLong(ctx.pathParam("id"));
-        noteRepository.patchNoteById(id, noteRequest.getTitle(), noteRequest.getMessage());
+        noteRepository.patchNoteById(id, notePatchRequest.getTitle(), notePatchRequest.getMessage());
     }
 
     public void deleteNote(Context ctx) throws SQLException {

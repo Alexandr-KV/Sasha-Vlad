@@ -1,17 +1,17 @@
 package ru.otus.request;
 
-import ru.otus.ValidationException;
+import ru.otus.exception.ValidationException;
 
-public class NoteRequest {
+public class NotePatchRequest {
     private String title;
     private String message;
 
-    public NoteRequest(String title, String message) {
+    public NotePatchRequest(String title, String message) {
         this.title = title;
         this.message = message;
     }
 
-    public NoteRequest() {
+    public NotePatchRequest() {
     }
 
     public String getTitle() {
@@ -30,13 +30,7 @@ public class NoteRequest {
         this.message = message;
     }
 
-    public void validPostRequest() throws ValidationException {
-        if (this.message == null || this.title == null) {
-            throw new ValidationException("Отсутствует title и/или message");
-        }
-    }
-
-    public void validPatchRequest() throws ValidationException {
+    public void valid() throws ValidationException {
         if (this.message == null && this.title == null) {
             throw new ValidationException("Отсутствует title и message");
         }
