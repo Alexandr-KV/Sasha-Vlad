@@ -43,17 +43,6 @@ public class Note {
         this.message = message;
     }
 
-    public void validPostRequest() throws ValidationException {
-        if (this.getMessage() == null || this.getTitle() == null) {
-            throw new ValidationException("Ошибка в теле запроса");
-        }
-    }
-
-    public void validPatchRequest() throws ValidationException {
-        if (this.getMessage() == null && this.getTitle() == null) {
-            throw new ValidationException("Ошибка в теле запроса");
-        }
-    }
 
     @Override
     public String toString() {
