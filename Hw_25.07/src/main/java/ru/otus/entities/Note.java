@@ -1,4 +1,4 @@
-package ru.otus;
+package ru.otus.entities;
 
 public class Note {
     private Long id;
