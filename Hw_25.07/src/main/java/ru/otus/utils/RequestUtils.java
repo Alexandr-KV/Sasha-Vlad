@@ -6,12 +6,12 @@ import org.slf4j.LoggerFactory;
 
 public class RequestUtils {
     private static final Logger logger = LoggerFactory.getLogger(RequestUtils.class);
-    public static void error(String messageForUser, String messageForAdmin, Context ctx){
-        logger.error(messageForAdmin);
-        ctx.json(messageForUser);
+
+    public static void logRequestBefore(Context ctx) {
+        logger.info("Получен  запрос: {} {}", ctx.method(), ctx.path());
     }
 
-    public static void info(String message){
-        logger.info(message);
+    public static void logRequestBeforeMatched(Context ctx) {
+        logger.info("{} {}", ctx.headerMap(), ctx.body());
     }
 }

@@ -1,10 +1,7 @@
-package ru.otus;
+package ru.otus.repository;
 
 import ru.otus.entities.Note;
-import ru.otus.entities.User;
-import ru.otus.exception.LoginException;
 import ru.otus.exception.NoteNotFoundException;
-import ru.otus.request.LoginRequest;
 
 import java.sql.*;
 import java.util.ArrayList;
@@ -12,12 +9,25 @@ import java.util.List;
 
 import static java.sql.Statement.RETURN_GENERATED_KEYS;
 
-public class ProjectRepository {
+public class NoteRepository {
     private final Connection connection;
     private final Statement statement;
 
-    public ProjectRepository() throws SQLException {
-        connection = DriverManager.getConnection("jdbc:sqlite:D:/ProjectDatabase.db");
+    public Connection getConnection() {
+        return connection;
+    }
+
+    public Statement getStatement() {
+        return statement;
+    }
+
+    public NoteRepository(Connection connection, Statement statement) {
+        this.connection = connection;
+        this.statement = statement;
+    }
+
+    public NoteRepository() throws SQLException {
+        connection = DriverManager.getConnection("jdbc:sqlite:D:/ProjectDB.db");
         statement = connection.createStatement();
     }
 
@@ -45,7 +55,7 @@ public class ProjectRepository {
         return new Note(id, title, message);
     }
 
-    public Long writeNewNote(String title, String message) throws SQLException {
+    public Long writeNote(String title, String message) throws SQLException {
         PreparedStatement ps = connection.prepareStatement("insert into notes (title, message) values (?, ?);", RETURN_GENERATED_KEYS);
         ps.setString(1, title);
         ps.setString(2, message);
@@ -83,54 +93,7 @@ public class ProjectRepository {
         ps.executeUpdate();
     }
 
-    public boolean isSuchUserExist(String email, String nickname) throws SQLException{
-        PreparedStatement ps = connection.prepareStatement("SELECT * FROM users WHERE email = (?) AND nickname = (?)");
-        ps.setString(1, email);
-        ps.setString(2,nickname);
-        var resSet = ps.executeQuery();
-        if (email.equals(resSet.getString("email")) || nickname.equals(resSet.getString("nickname"))) {
-            return true;
-        }
-        return false;
-    }
-
-    public void writeNewUser(String nickname, String email, String password) throws SQLException{
-        PreparedStatement ps = connection.prepareStatement("insert into users (email, nickname, password) values (?, ?, ?);");
-        ps.setString(1, email);
-        ps.setString(2, nickname);
-        ps.setString(3, password);
-        ps.executeUpdate();
-    }
-
-    public User getUserByEmailOrNickname(LoginRequest loginRequest, boolean searchByEmail) throws SQLException{
-        if (searchByEmail){
-            String email = loginRequest.getEmail();
-            PreparedStatement ps = connection.prepareStatement("SELECT * FROM users WHERE email = (?)");
-            ps.setString(1, email);
-            var resSet = ps.executeQuery();
-            if (resSet == null){
-                throw new LoginException("Неверный email");
-            }
-            String nickname = resSet.getString("nickname");
-            email = resSet.getString("email");
-            String password = resSet.getString("password");
-            return new User(nickname,email,password);
-        }else {
-            String nickname = loginRequest.getNickname();
-            PreparedStatement ps = connection.prepareStatement("SELECT * FROM users WHERE nickname = (?)");
-            ps.setString(1, nickname);
-            var resSet = ps.executeQuery();
-            if (resSet == null){
-                throw new LoginException("Неверный nickname");
-            }
-            nickname = resSet.getString("nickname");
-            String email = resSet.getString("email");
-            String password = resSet.getString("password");
-            return new User(nickname,email,password);
-        }
-    }
-
-    public void closeDb() throws SQLException {
+    public void closeNoteRepository() throws SQLException {
         connection.close();
         statement.close();
     }

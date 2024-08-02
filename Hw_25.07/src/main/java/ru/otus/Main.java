@@ -1,7 +1,10 @@
 package ru.otus;
 
 
+import ru.otus.repository.NoteRepository;
+import ru.otus.repository.UserRepository;
 import io.javalin.Javalin;
+import io.jsonwebtoken.Jwts;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import ru.otus.controller.NoteController;
@@ -10,7 +13,10 @@ import ru.otus.exception.LoginException;
 import ru.otus.exception.NoteNotFoundException;
 import ru.otus.exception.RegistrationException;
 import ru.otus.exception.ValidationException;
+import ru.otus.utils.ExceptionHandler;
+import ru.otus.utils.JwtUtils;
 import ru.otus.utils.RequestUtils;
+import ru.otus.utils.ResponseUtils;
 
 import java.sql.SQLException;
 
@@ -19,27 +25,31 @@ public class Main {
 
     public static void main(String[] args) throws SQLException {
 
-        RequestUtils.info("Сервер запущен");
+        logger.info("Сервер запущен");
 
-        ProjectRepository projectRepository = new ProjectRepository();
-        NoteController noteController = new NoteController(projectRepository);
-        UserController userController = new UserController(projectRepository);
+        JwtUtils jwtUtils = new JwtUtils(Jwts.SIG.HS256.key().build());
+        UserRepository userRepository = new UserRepository();
+        NoteRepository noteRepository = new NoteRepository(userRepository.getConnection(), userRepository.getStatement());
+        NoteController noteController = new NoteController(noteRepository, jwtUtils);
+        UserController userController = new UserController(userRepository, jwtUtils);
 
         Javalin.create()
-                .events(eventConfig -> eventConfig.serverStopping(projectRepository::closeDb))
-                .before(ctx -> RequestUtils.info("Получен  запрос: " + ctx.method() + " " + ctx.path()))//из-за выноса логирования в отдельный класс
-                //без конкатенации не обойтись
-                .beforeMatched(ctx -> RequestUtils.info(ctx.headerMap() + " " + ctx.body()))
-                .afterMatched(ctx -> RequestUtils.info("Выдан ответ: " + ctx.status() + " " + ctx.headerMap() + " " + ctx.result()))
-                .after(ctx -> RequestUtils.info("Окончен запрос: " + ctx.method() + " " + ctx.path()))
-                .exception(ValidationException.class, (e, ctx) -> RequestUtils.error("Возникло ValidException", "Возникло ValidException " + e, ctx))
-                .exception(NoteNotFoundException.class, (e, ctx) -> RequestUtils.error("Возникло NoteNotFoundException", "Возникло NoteNotFoundException " + e, ctx))
-                .exception(RegistrationException.class, (e, ctx) -> RequestUtils.error("Возникло RegistrationException", "Возникло RegistrationException " + e, ctx))
-                .exception(LoginException.class, (e, ctx) -> RequestUtils.error("Возникло LoginException", "Возникло LoginException " + e, ctx))
+                .events(eventConfig -> {
+                    eventConfig.serverStopping(noteRepository::closeNoteRepository);
+                    eventConfig.serverStopping(userRepository::closeUserRepository);
+                })
+                .before(RequestUtils::logRequestBefore)
+                .beforeMatched(RequestUtils::logRequestBeforeMatched)
+                .afterMatched(ResponseUtils::logResponseAfterMatched)
+                .after(ResponseUtils::logResponseAfter)
+                .exception(ValidationException.class, ExceptionHandler::handleValidException)
+                .exception(NoteNotFoundException.class, ExceptionHandler::handleNoteNotFoundException)
+                .exception(RegistrationException.class, ExceptionHandler::handleRegistrationException)
+                .exception(LoginException.class, ExceptionHandler::handleLoginException)
                 .get("/note", noteController::getAllNotes)
                 .get("/note/{id}", noteController::getNoteById)
                 .post("/note", noteController::postNote)
-                .post("/registration", userController::registrationNewUser)
+                .post("/registration", userController::registrationUser)
                 .post("/login", userController::loginUser)
                 .patch("/note/{id}", noteController::patchNote)
                 .delete("/note/{id}", noteController::deleteNote)
