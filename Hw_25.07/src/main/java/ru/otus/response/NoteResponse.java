@@ -1,6 +1,6 @@
 package ru.otus.response;
 
-import ru.otus.Note;
+import ru.otus.entities.Note;
 
 public class NoteResponse {
     private Long id;

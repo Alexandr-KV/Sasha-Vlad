@@ -1,5 +1,6 @@
-package ru.otus;
+package ru.otus.repository;
 
+import ru.otus.entities.Note;
 import ru.otus.exception.NoteNotFoundException;
 
 import java.sql.*;
@@ -12,8 +13,21 @@ public class NoteRepository {
     private final Connection connection;
     private final Statement statement;
 
+    public Connection getConnection() {
+        return connection;
+    }
+
+    public Statement getStatement() {
+        return statement;
+    }
+
+    public NoteRepository(Connection connection, Statement statement) {
+        this.connection = connection;
+        this.statement = statement;
+    }
+
     public NoteRepository() throws SQLException {
-        connection = DriverManager.getConnection("jdbc:sqlite:D:/notes.db");
+        connection = DriverManager.getConnection("jdbc:sqlite:D:/ProjectDB.db");
         statement = connection.createStatement();
     }
 
@@ -41,7 +55,7 @@ public class NoteRepository {
         return new Note(id, title, message);
     }
 
-    public Long writeNewNoteIntoRepository(String title, String message) throws SQLException {
+    public Long writeNote(String title, String message) throws SQLException {
         PreparedStatement ps = connection.prepareStatement("insert into notes (title, message) values (?, ?);", RETURN_GENERATED_KEYS);
         ps.setString(1, title);
         ps.setString(2, message);
@@ -79,7 +93,7 @@ public class NoteRepository {
         ps.executeUpdate();
     }
 
-    public void closeDb() throws SQLException {
+    public void closeNoteRepository() throws SQLException {
         connection.close();
         statement.close();
     }
