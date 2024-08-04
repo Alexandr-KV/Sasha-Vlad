@@ -6,19 +6,19 @@ import ru.otus.request.LoginRequest;
 
 import java.sql.*;
 
+import static java.sql.Statement.RETURN_GENERATED_KEYS;
+
 public class UserRepository {
     private final Connection connection;
     private final Statement statement;
+    private final RoleRepository roleRepository;
 
-    public UserRepository(Connection connection, Statement statement) {
+    public UserRepository(Connection connection, Statement statement, RoleRepository roleRepository) {
         this.connection = connection;
         this.statement = statement;
+        this.roleRepository = roleRepository;
     }
 
-    public UserRepository() throws SQLException {
-        connection = DriverManager.getConnection("jdbc:sqlite:D:/ProjectDB.db");
-        statement = connection.createStatement();
-    }
 
     public Connection getConnection() {
         return connection;
@@ -37,11 +37,14 @@ public class UserRepository {
     }
 
     public void writeUser(String nickname, String email, String password) throws SQLException{
-        PreparedStatement ps = connection.prepareStatement("insert into users (email, nickname, password) values (?, ?, ?);");
+        PreparedStatement ps = connection.prepareStatement("insert into users (email, nickname, password) values (?, ?, ?);", RETURN_GENERATED_KEYS);
         ps.setString(1, email);
         ps.setString(2, nickname);
         ps.setString(3, password);
         ps.executeUpdate();
+        ResultSet generatedKeys = ps.getGeneratedKeys();
+        Long id = (long) generatedKeys.getInt(1);
+        roleRepository.writeNewClientIntoUserRoleLink(id);
     }
 
     public User getUserByEmailOrNickname(LoginRequest loginRequest, boolean searchByEmail) throws SQLException{
@@ -70,6 +73,13 @@ public class UserRepository {
             String password = resSet.getString("password");
             return new User(nickname,email,password);
         }
+    }
+
+    public Long getUserIdByEmail(String email) throws SQLException{
+        PreparedStatement ps = connection.prepareStatement("SELECT * FROM users WHERE email = (?)");
+        ps.setString(1, email);
+        var resSet = ps.executeQuery();
+        return resSet.getLong("id");
     }
 
     public void closeUserRepository() throws SQLException {
