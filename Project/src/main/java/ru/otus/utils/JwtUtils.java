@@ -16,7 +16,7 @@ public class JwtUtils {
         return Jwts.builder().subject(email).signWith(key).compact();
     }
 
-    public void parse(String token) {
-        Jwts.parser().verifyWith(key).build().parseSignedClaims(token).getPayload().getSubject();
+    public String parse(String token) {
+        return Jwts.parser().verifyWith(key).build().parseSignedClaims(token).getPayload().getSubject();
     }
 }
