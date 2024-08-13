@@ -1,9 +1,8 @@
-package ru.otus.utils;
+package ru.otus.exception;
 
 import io.javalin.http.Context;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import ru.otus.exception.*;
 
 public class ExceptionHandler {
     private static final Logger logger = LoggerFactory.getLogger(ExceptionHandler.class);

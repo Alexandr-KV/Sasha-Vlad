@@ -12,7 +12,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import ru.otus.controller.NoteController;
 import ru.otus.controller.UserController;
-import ru.otus.utils.ExceptionHandler;
+import ru.otus.exception.ExceptionHandler;
 import ru.otus.utils.JwtUtils;
 import ru.otus.utils.RequestUtils;
 import ru.otus.utils.ResponseUtils;
@@ -33,18 +33,20 @@ public class Main {
 
         Connection connection = DriverManager.getConnection("jdbc:sqlite:D:/ProjectDB.db");
         Statement statement = connection.createStatement();
-        RoleRepository roleRepository = new RoleRepository(connection,statement);
-        UserRepository userRepository = new UserRepository(connection,statement, roleRepository);
-        NoteRepository noteRepository = new NoteRepository(connection,statement);
+        RoleRepository roleRepository = new RoleRepository(connection, statement);
+        UserRepository userRepository = new UserRepository(connection, statement, roleRepository);
+        NoteRepository noteRepository = new NoteRepository(connection, statement);
         JwtUtils jwtUtils = new JwtUtils(Jwts.SIG.HS256.key().build());
         NoteController noteController = new NoteController(noteRepository, jwtUtils);
         UserController userController = new UserController(userRepository, jwtUtils);
-        AuthService authService = new AuthService(userRepository,roleRepository,jwtUtils);
+        AuthService authService = new AuthService(userRepository, roleRepository, jwtUtils);
 
         Javalin.create()
                 .events(eventConfig -> {
-                    eventConfig.serverStopping(noteRepository::closeNoteRepository);
-                    eventConfig.serverStopping(userRepository::closeUserRepository);
+                    eventConfig.serverStopping(()->{
+                        connection.close();
+                        statement.close();
+                    });
                 })
 
                 .before(RequestUtils::logRequestBefore)
@@ -61,14 +63,14 @@ public class Main {
                 .exception(LoginException.class, ExceptionHandler::handleLoginException)
                 .exception(AuthException.class, ExceptionHandler::handleAuthException)
 
-                .get("/note", noteController::getAllNotes, CLIENT,ADMIN )
-                .get("/note/{id}", noteController::getNoteById, CLIENT,ADMIN)
-                .post("/note", noteController::postNote, CLIENT,ADMIN)
-                .patch("/note/{id}", noteController::patchNote,CLIENT,ADMIN)
-                .delete("/note/{id}", noteController::deleteNote,CLIENT,ADMIN)
+                .get("/note", noteController::getAllNotes, CLIENT, ADMIN)
+                .get("/note/{id}", noteController::getNoteById, CLIENT, ADMIN)
+                .post("/note", noteController::postNote, CLIENT, ADMIN)
+                .patch("/note/{id}", noteController::patchNote, CLIENT, ADMIN)
+                .delete("/note/{id}", noteController::deleteNote, CLIENT, ADMIN)
 
                 .post("/registration", userController::registrationUser, NOT_REGISTERED)
-                .post("/login", userController::loginUser,NOT_REGISTERED)
+                .post("/login", userController::loginUser, NOT_REGISTERED)
 
                 .start();
     }

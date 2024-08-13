@@ -82,8 +82,4 @@ public class UserRepository {
         return resSet.getLong("id");
     }
 
-    public void closeUserRepository() throws SQLException {
-        connection.close();
-        statement.close();
-    }
 }

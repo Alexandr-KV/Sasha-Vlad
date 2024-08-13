@@ -32,8 +32,8 @@ public class RoleRepository {
 
     public void writeNewClientIntoUserRoleLink(Long userId) throws SQLException {
         PreparedStatement ps = connection.prepareStatement("insert into user_role_link (id_user, id_role) values (?, ?);");
-        ps.setLong(1,userId);
-        ps.setLong(2,2);
+        ps.setLong(1, userId);
+        ps.setLong(2, 2);
         ps.executeUpdate();
     }
 
@@ -52,13 +52,13 @@ public class RoleRepository {
             ps.setLong(1, aLong);
             resSet = ps.executeQuery();
             String roleString = resSet.getString("role");
-            if (roleString.equals("ADMIN")){
+            if (roleString.equals("ADMIN")) {
                 roles.add(ADMIN);
             }
-            if (roleString.equals("CLIENT")){
+            if (roleString.equals("CLIENT")) {
                 roles.add(CLIENT);
             }
-            if (roleString.equals("NOT_REGISTERED")){
+            if (roleString.equals("NOT_REGISTERED")) {
                 roles.add(NOT_REGISTERED);
             }
 

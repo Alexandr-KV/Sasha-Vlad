@@ -88,8 +88,4 @@ public class NoteRepository {
         ps.executeUpdate();
     }
 
-    public void closeNoteRepository() throws SQLException {
-        connection.close();
-        statement.close();
-    }
 }

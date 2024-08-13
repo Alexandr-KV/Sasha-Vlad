@@ -1,7 +1,6 @@
 package ru.otus.authentication;
 
 import io.javalin.http.Context;
-import ru.otus.authentication.Role;
 import ru.otus.exception.AuthException;
 import ru.otus.repository.RoleRepository;
 import ru.otus.repository.UserRepository;
@@ -24,17 +23,17 @@ public class AuthService {
         this.jwtUtils = jwtUtils;
     }
 
-    public void handleAccess(Context ctx) throws SQLException{
+    public void handleAccess(Context ctx) throws SQLException {
 
         var routeRoles = ctx.routeRoles();
-        if (routeRoles.contains(NOT_REGISTERED)){
+        if (routeRoles.contains(NOT_REGISTERED)) {
             return;
         }
 
         var userRoles = getUserRoles(ctx);
 
         routeRoles.retainAll(userRoles);
-        if (!routeRoles.isEmpty()){
+        if (!routeRoles.isEmpty()) {
             return;
         }
 
@@ -44,7 +43,7 @@ public class AuthService {
 
     private Set<Role> getUserRoles(Context ctx) throws SQLException {
         var token = ctx.header("Authorization");
-        if (token == null){
+        if (token == null) {
             return Set.of(NOT_REGISTERED);
         }
         String email = jwtUtils.parse(token);

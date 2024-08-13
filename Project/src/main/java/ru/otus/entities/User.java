@@ -4,6 +4,7 @@ public class User {
     private String nickname;
     private String email;
     private String password;
+    private Long id;
 
     public User(String nickname, String email, String password) {
         this.nickname = nickname;
@@ -39,12 +40,21 @@ public class User {
         this.password = password;
     }
 
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
     @Override
     public String toString() {
         return "User{" +
                 "nickname='" + nickname + '\'' +
                 ", email='" + email + '\'' +
                 ", password='" + password + '\'' +
+                ", id=" + id +
                 '}';
     }
 }
