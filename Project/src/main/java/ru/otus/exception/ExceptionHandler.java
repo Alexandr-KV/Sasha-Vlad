@@ -1,12 +1,8 @@
-package ru.otus.utils;
+package ru.otus.exception;
 
 import io.javalin.http.Context;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import ru.otus.exception.LoginException;
-import ru.otus.exception.NoteNotFoundException;
-import ru.otus.exception.RegistrationException;
-import ru.otus.exception.ValidationException;
 
 public class ExceptionHandler {
     private static final Logger logger = LoggerFactory.getLogger(ExceptionHandler.class);
@@ -28,6 +24,11 @@ public class ExceptionHandler {
 
     public static void handleValidException(ValidationException e, Context ctx) {
         logger.error("Возникло ValidException",e);
+        ctx.json(e.getMessage());
+    }
+
+    public static void handleAuthException(AuthException e, Context ctx){
+        logger.error("Возникло AuthException",e);
         ctx.json(e.getMessage());
     }
 }

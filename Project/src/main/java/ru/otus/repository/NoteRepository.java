@@ -26,11 +26,6 @@ public class NoteRepository {
         this.statement = statement;
     }
 
-    public NoteRepository() throws SQLException {
-        connection = DriverManager.getConnection("jdbc:sqlite:D:/ProjectDB.db");
-        statement = connection.createStatement();
-    }
-
     public List<Note> readAllNotes() throws SQLException {
         var resSet = statement.executeQuery("SELECT * FROM notes");
         List<Note> notes = new ArrayList<>();
@@ -93,8 +88,4 @@ public class NoteRepository {
         ps.executeUpdate();
     }
 
-    public void closeNoteRepository() throws SQLException {
-        connection.close();
-        statement.close();
-    }
 }
