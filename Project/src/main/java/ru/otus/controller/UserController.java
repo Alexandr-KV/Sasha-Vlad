@@ -35,9 +35,9 @@ public class UserController {
         loginRequest.valid();
         User user;
         if (loginRequest.getEmail() == null) {
-            user = userRepository.getUserByEmailOrNickname(loginRequest, false);
+            user = userRepository.getUserByNickname(loginRequest.getNickname());
         } else {
-            user = userRepository.getUserByEmailOrNickname(loginRequest, true);
+            user = userRepository.getUserByEmail(loginRequest.getEmail());
         }
         String password = user.getPassword();
         String email = user.getEmail();

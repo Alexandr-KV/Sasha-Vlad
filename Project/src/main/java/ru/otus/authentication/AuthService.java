@@ -1,6 +1,7 @@
 package ru.otus.authentication;
 
 import io.javalin.http.Context;
+import ru.otus.entities.User;
 import ru.otus.exception.AuthException;
 import ru.otus.repository.RoleRepository;
 import ru.otus.repository.UserRepository;
@@ -47,7 +48,10 @@ public class AuthService {
             return Set.of(NOT_REGISTERED);
         }
         String email = jwtUtils.parse(token);
-        Long userId = userRepository.getUserIdByEmail(email);
-        return roleRepository.getRolesByUserId(userId);
+        User user = userRepository.getUserByEmail(email);
+        var roles = roleRepository.getRolesByUserId(user.getId());
+        user.setRoles(roles);
+        ctx.attribute("user", user);
+        return roles;
     }
 }

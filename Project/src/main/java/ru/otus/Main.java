@@ -37,7 +37,7 @@ public class Main {
         UserRepository userRepository = new UserRepository(connection, statement, roleRepository);
         NoteRepository noteRepository = new NoteRepository(connection, statement);
         JwtUtils jwtUtils = new JwtUtils(Jwts.SIG.HS256.key().build());
-        NoteController noteController = new NoteController(noteRepository, jwtUtils);
+        NoteController noteController = new NoteController(noteRepository);
         UserController userController = new UserController(userRepository, jwtUtils);
         AuthService authService = new AuthService(userRepository, roleRepository, jwtUtils);
 

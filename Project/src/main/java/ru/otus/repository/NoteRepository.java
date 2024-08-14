@@ -1,6 +1,8 @@
 package ru.otus.repository;
 
+import io.javalin.http.Context;
 import ru.otus.entities.Note;
+import ru.otus.entities.User;
 import ru.otus.exception.NoteNotFoundException;
 
 import java.sql.*;
@@ -26,8 +28,10 @@ public class NoteRepository {
         this.statement = statement;
     }
 
-    public List<Note> readAllNotes() throws SQLException {
-        var resSet = statement.executeQuery("SELECT * FROM notes");
+    public List<Note> readAllNotes(User user) throws SQLException {
+        PreparedStatement ps = connection.prepareStatement("SELECT * FROM notes WHERE user_id = (?)");
+        ps.setLong(1, user.getId());
+        var resSet = ps.executeQuery();
         List<Note> notes = new ArrayList<>();
         while (resSet.next()) {
             Long id = resSet.getLong("id");
@@ -38,9 +42,10 @@ public class NoteRepository {
         return notes;
     }
 
-    public Note readNoteById(long id) throws SQLException, NoteNotFoundException {
-        PreparedStatement ps = connection.prepareStatement("SELECT * FROM notes WHERE id = (?)");
+    public Note readNoteById(long id, User user) throws SQLException, NoteNotFoundException {
+        PreparedStatement ps = connection.prepareStatement("SELECT * FROM notes WHERE id = (?) AND user_id = (?)");
         ps.setLong(1, id);
+        ps.setLong(2,user.getId());
         var resSet = ps.executeQuery();
         String title = resSet.getString("title");
         String message = resSet.getString("message");
@@ -50,41 +55,46 @@ public class NoteRepository {
         return new Note(id, title, message);
     }
 
-    public Long writeNote(String title, String message) throws SQLException {
-        PreparedStatement ps = connection.prepareStatement("insert into notes (title, message) values (?, ?);", RETURN_GENERATED_KEYS);
-        ps.setString(1, title);
-        ps.setString(2, message);
+    public Long writeNote(String title, String message, User user) throws SQLException {
+        PreparedStatement ps = connection.prepareStatement("insert into notes (user_id, title, message) values (?, ?, ?);", RETURN_GENERATED_KEYS);
+        ps.setLong(1,user.getId());
+        ps.setString(2, title);
+        ps.setString(3, message);
         ps.executeUpdate();
         ResultSet generatedKeys = ps.getGeneratedKeys();
         return (long) generatedKeys.getInt(1);
     }
 
-    public void patchNoteById(Long id, String title, String message) throws SQLException {
+    public void patchNoteById(Long id, String title, String message, User user) throws SQLException {
         if (title != null) {
             if (message != null) {
-                PreparedStatement ps = connection.prepareStatement("UPDATE notes SET title = (?), message = (?) WHERE id = (?)");
+                PreparedStatement ps = connection.prepareStatement("UPDATE notes SET title = (?), message = (?) WHERE id = (?) AND user_id = (?)");
                 ps.setString(1, title);
                 ps.setString(2, message);
                 ps.setLong(3, id);
+                ps.setLong(4,user.getId());
                 ps.executeUpdate();
             } else {
-                PreparedStatement ps = connection.prepareStatement("UPDATE notes SET title = (?) WHERE id = (?)");
+                PreparedStatement ps = connection.prepareStatement("UPDATE notes SET title = (?) WHERE id = (?) AND user_id = (?)");
                 ps.setString(1, title);
                 ps.setLong(2, id);
+                ps.setLong(3,user.getId());
                 ps.executeUpdate();
             }
 
         } else {
-            PreparedStatement ps = connection.prepareStatement("UPDATE notes SET message = (?) WHERE id = (?)");
+            PreparedStatement ps = connection.prepareStatement("UPDATE notes SET message = (?) WHERE id = (?) AND user_id = (?)");
             ps.setString(1, message);
             ps.setLong(2, id);
+            ps.setLong(3,user.getId());
             ps.executeUpdate();
         }
     }
 
-    public void deleteNoteById(Long id) throws SQLException {
-        PreparedStatement ps = connection.prepareStatement("DELETE FROM notes WHERE id = (?)");
+    public void deleteNoteById(Long id, User user) throws SQLException {
+        PreparedStatement ps = connection.prepareStatement("DELETE FROM notes WHERE id = (?) AND user_id = (?)");
         ps.setLong(1, id);
+        ps.setLong(2, user.getId());
         ps.executeUpdate();
     }
 
