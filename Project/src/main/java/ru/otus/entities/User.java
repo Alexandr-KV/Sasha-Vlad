@@ -21,23 +21,14 @@ public class User {
     public User() {
     }
 
-    public Set<Role> getRoles() {
-        return roles;
-    }
 
     public void setRoles(Set<Role> roles) {
         this.roles = roles;
     }
 
-    public String getNickname() {
-        return nickname;
-    }
-
-
     public String getEmail() {
         return email;
     }
-
 
     public String getPassword() {
         return password;

@@ -1,6 +1,5 @@
 package ru.otus.repository;
 
-import io.javalin.http.Context;
 import ru.otus.entities.Note;
 import ru.otus.entities.User;
 import ru.otus.exception.NoteNotFoundException;
@@ -15,13 +14,6 @@ public class NoteRepository {
     private final Connection connection;
     private final Statement statement;
 
-    public Connection getConnection() {
-        return connection;
-    }
-
-    public Statement getStatement() {
-        return statement;
-    }
 
     public NoteRepository(Connection connection, Statement statement) {
         this.connection = connection;

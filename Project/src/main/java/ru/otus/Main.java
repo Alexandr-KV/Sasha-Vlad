@@ -42,12 +42,10 @@ public class Main {
         AuthService authService = new AuthService(userRepository, roleRepository, jwtUtils);
 
         Javalin.create()
-                .events(eventConfig -> {
-                    eventConfig.serverStopping(()->{
-                        connection.close();
-                        statement.close();
-                    });
-                })
+                .events(eventConfig -> eventConfig.serverStopping(()->{
+                    connection.close();
+                    statement.close();
+                }))
 
                 .before(RequestUtils::logRequestBefore)
                 .beforeMatched(ctx -> {
@@ -62,6 +60,7 @@ public class Main {
                 .exception(RegistrationException.class, ExceptionHandler::handleRegistrationException)
                 .exception(LoginException.class, ExceptionHandler::handleLoginException)
                 .exception(AuthException.class, ExceptionHandler::handleAuthException)
+                .exception(Exception.class, ExceptionHandler :: handleException)
 
                 .get("/note", noteController::getAllNotes, CLIENT, ADMIN)
                 .get("/note/{id}", noteController::getNoteById, CLIENT, ADMIN)

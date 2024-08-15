@@ -22,13 +22,6 @@ public class RoleRepository {
         this.statement = statement;
     }
 
-    public Connection getConnection() {
-        return connection;
-    }
-
-    public Statement getStatement() {
-        return statement;
-    }
 
     public void writeNewClientIntoUserRoleLink(Long userId) throws SQLException {
         PreparedStatement ps = connection.prepareStatement("insert into user_role_link (id_user, id_role) values (?, ?);");

@@ -42,7 +42,7 @@ public class UserController {
         String password = user.getPassword();
         String email = user.getEmail();
         if (!Objects.equals(password, String.valueOf(loginRequest.getPassword().hashCode()))) {
-            throw new LoginException("Неверный пароль");
+            throw new LoginException("Неверный password, email или nickname");
         }
         ctx.result(jwtUtils.builder(email));
     }

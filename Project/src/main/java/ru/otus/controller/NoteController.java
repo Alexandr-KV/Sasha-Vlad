@@ -10,7 +10,6 @@ import ru.otus.repository.NoteRepository;
 import ru.otus.request.NotePatchRequest;
 import ru.otus.request.NotePostRequest;
 import ru.otus.response.NoteResponse;
-import ru.otus.utils.JwtUtils;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -24,7 +23,8 @@ public class NoteController {
     }
 
     public void getAllNotes(Context ctx) throws SQLException, JsonProcessingException {
-        User user = (User) ctx.attribute("user");
+        User user = ctx.attribute("user");
+        assert user != null;
         List<Note> notes = noteRepository.readAllNotes(user);
         var responseArray = new ArrayList<NoteResponse>();
         for (var note : notes) {
@@ -35,7 +35,8 @@ public class NoteController {
 
     public void getNoteById(Context ctx) throws SQLException, JsonProcessingException {
         Long id = Long.parseLong(ctx.pathParam("id"));
-        User user = (User) ctx.attribute("user");
+        User user = ctx.attribute("user");
+        assert user != null;
         NoteResponse noteResponse = new NoteResponse(noteRepository.readNoteById(id, user));
         ctx.result(new ObjectMapper().writeValueAsString(noteResponse));
     }
@@ -43,7 +44,8 @@ public class NoteController {
     public void postNote(Context ctx) throws SQLException, JsonProcessingException {
         NotePostRequest notePostRequest = ctx.bodyAsClass(NotePostRequest.class);
         notePostRequest.valid();
-        var user = (User) ctx.attribute("user");
+        User user = ctx.attribute("user");
+        assert user != null;
         Long id = noteRepository.writeNote(notePostRequest.getTitle(), notePostRequest.getMessage(),user);
         ctx.result(new ObjectMapper().writeValueAsString(id));
     }
@@ -52,13 +54,14 @@ public class NoteController {
         NotePatchRequest notePatchRequest = ctx.bodyAsClass(NotePatchRequest.class);
         notePatchRequest.valid();
         Long id = Long.parseLong(ctx.pathParam("id"));
-        User user = (User) ctx.attribute("user");
+        User user = ctx.attribute("user");
         noteRepository.patchNoteById(id, notePatchRequest.getTitle(), notePatchRequest.getMessage(), user);
     }
 
     public void deleteNote(Context ctx) throws SQLException {
         Long id = Long.parseLong(ctx.pathParam("id"));
-        User user = (User) ctx.attribute("user");
+        User user = ctx.attribute("user");
+        assert user != null;
         noteRepository.deleteNoteById(id, user);
     }
 }

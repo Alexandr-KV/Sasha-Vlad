@@ -2,7 +2,6 @@ package ru.otus.repository;
 
 import ru.otus.entities.User;
 import ru.otus.exception.LoginException;
-import ru.otus.request.LoginRequest;
 
 import java.sql.*;
 
@@ -17,15 +16,6 @@ public class UserRepository {
         this.connection = connection;
         this.statement = statement;
         this.roleRepository = roleRepository;
-    }
-
-
-    public Connection getConnection() {
-        return connection;
-    }
-
-    public Statement getStatement() {
-        return statement;
     }
 
     public boolean isSuchUserExist(String email, String nickname) throws SQLException {
