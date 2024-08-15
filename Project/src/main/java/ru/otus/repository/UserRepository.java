@@ -2,7 +2,6 @@ package ru.otus.repository;
 
 import ru.otus.entities.User;
 import ru.otus.exception.LoginException;
-import ru.otus.request.LoginRequest;
 
 import java.sql.*;
 
@@ -19,24 +18,15 @@ public class UserRepository {
         this.roleRepository = roleRepository;
     }
 
-
-    public Connection getConnection() {
-        return connection;
-    }
-
-    public Statement getStatement() {
-        return statement;
-    }
-
-    public boolean isSuchUserExist(String email, String nickname) throws SQLException{
+    public boolean isSuchUserExist(String email, String nickname) throws SQLException {
         PreparedStatement ps = connection.prepareStatement("SELECT * FROM users WHERE email = (?) AND nickname = (?)");
         ps.setString(1, email);
-        ps.setString(2,nickname);
+        ps.setString(2, nickname);
         var resSet = ps.executeQuery();
         return email.equals(resSet.getString("email")) || nickname.equals(resSet.getString("nickname"));
     }
 
-    public void writeUser(String nickname, String email, String password) throws SQLException{
+    public void writeUser(String nickname, String email, String password) throws SQLException {
         PreparedStatement ps = connection.prepareStatement("insert into users (email, nickname, password) values (?, ?, ?);", RETURN_GENERATED_KEYS);
         ps.setString(1, email);
         ps.setString(2, nickname);
@@ -47,39 +37,31 @@ public class UserRepository {
         roleRepository.writeNewClientIntoUserRoleLink(id);
     }
 
-    public User getUserByEmailOrNickname(LoginRequest loginRequest, boolean searchByEmail) throws SQLException{
-        if (searchByEmail){
-            String email = loginRequest.getEmail();
-            PreparedStatement ps = connection.prepareStatement("SELECT * FROM users WHERE email = (?)");
-            ps.setString(1, email);
-            var resSet = ps.executeQuery();
-            if (resSet == null){
-                throw new LoginException("Неверный email");
-            }
-            String nickname = resSet.getString("nickname");
-            email = resSet.getString("email");
-            String password = resSet.getString("password");
-            return new User(nickname,email,password);
-        }else {
-            String nickname = loginRequest.getNickname();
-            PreparedStatement ps = connection.prepareStatement("SELECT * FROM users WHERE nickname = (?)");
-            ps.setString(1, nickname);
-            var resSet = ps.executeQuery();
-            if (resSet == null){
-                throw new LoginException("Неверный nickname");
-            }
-            nickname = resSet.getString("nickname");
-            String email = resSet.getString("email");
-            String password = resSet.getString("password");
-            return new User(nickname,email,password);
-        }
-    }
-
-    public Long getUserIdByEmail(String email) throws SQLException{
+    public User getUserByEmail(String email) throws SQLException {
         PreparedStatement ps = connection.prepareStatement("SELECT * FROM users WHERE email = (?)");
         ps.setString(1, email);
         var resSet = ps.executeQuery();
-        return resSet.getLong("id");
+        if (resSet == null) {
+            throw new LoginException("Неверный email");
+        }
+        String nickname = resSet.getString("nickname");
+        email = resSet.getString("email");
+        String password = resSet.getString("password");
+        Long id = resSet.getLong("id");
+        return new User(nickname, email, password, id);
     }
 
+    public User getUserByNickname(String nickname) throws SQLException {
+        PreparedStatement ps = connection.prepareStatement("SELECT * FROM users WHERE nickname = (?)");
+        ps.setString(1, nickname);
+        var resSet = ps.executeQuery();
+        if (resSet == null) {
+            throw new LoginException("Неверный nickname");
+        }
+        nickname = resSet.getString("nickname");
+        String email = resSet.getString("email");
+        String password = resSet.getString("password");
+        Long id = resSet.getLong("id");
+        return new User(nickname, email, password, id);
+    }
 }

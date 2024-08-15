@@ -35,14 +35,14 @@ public class UserController {
         loginRequest.valid();
         User user;
         if (loginRequest.getEmail() == null) {
-            user = userRepository.getUserByEmailOrNickname(loginRequest, false);
+            user = userRepository.getUserByNickname(loginRequest.getNickname());
         } else {
-            user = userRepository.getUserByEmailOrNickname(loginRequest, true);
+            user = userRepository.getUserByEmail(loginRequest.getEmail());
         }
         String password = user.getPassword();
         String email = user.getEmail();
         if (!Objects.equals(password, String.valueOf(loginRequest.getPassword().hashCode()))) {
-            throw new LoginException("Неверный пароль");
+            throw new LoginException("Неверный password, email или nickname");
         }
         ctx.result(jwtUtils.builder(email));
     }

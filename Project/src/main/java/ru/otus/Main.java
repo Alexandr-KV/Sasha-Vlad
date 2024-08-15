@@ -37,17 +37,15 @@ public class Main {
         UserRepository userRepository = new UserRepository(connection, statement, roleRepository);
         NoteRepository noteRepository = new NoteRepository(connection, statement);
         JwtUtils jwtUtils = new JwtUtils(Jwts.SIG.HS256.key().build());
-        NoteController noteController = new NoteController(noteRepository, jwtUtils);
+        NoteController noteController = new NoteController(noteRepository);
         UserController userController = new UserController(userRepository, jwtUtils);
         AuthService authService = new AuthService(userRepository, roleRepository, jwtUtils);
 
         Javalin.create()
-                .events(eventConfig -> {
-                    eventConfig.serverStopping(()->{
-                        connection.close();
-                        statement.close();
-                    });
-                })
+                .events(eventConfig -> eventConfig.serverStopping(()->{
+                    connection.close();
+                    statement.close();
+                }))
 
                 .before(RequestUtils::logRequestBefore)
                 .beforeMatched(ctx -> {
@@ -62,6 +60,7 @@ public class Main {
                 .exception(RegistrationException.class, ExceptionHandler::handleRegistrationException)
                 .exception(LoginException.class, ExceptionHandler::handleLoginException)
                 .exception(AuthException.class, ExceptionHandler::handleAuthException)
+                .exception(Exception.class, ExceptionHandler :: handleException)
 
                 .get("/note", noteController::getAllNotes, CLIENT, ADMIN)
                 .get("/note/{id}", noteController::getNoteById, CLIENT, ADMIN)
